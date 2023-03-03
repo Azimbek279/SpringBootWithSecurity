@@ -1,8 +1,10 @@
 package peaksoft.service.serviceImpl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import peaksoft.exception.BadRequestException;
+import peaksoft.exception.NotFoundException;
 import peaksoft.model.Appointment;
 import peaksoft.model.Department;
 import peaksoft.model.Doctor;
@@ -33,10 +35,14 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public void saveDepartment(Department department, Long hospitalId) {
-        Hospital hos = hospitalRepository.getById(hospitalId);
-        hos.addDepartment(department);
-        department.setHospital(hos);
-        departmentRepository.save(department);
+        Department department1 = new Department();
+        if (hospitalRepository.getById(hospitalId) == null){
+            throw new NotFoundException(String.format("Hospital with id %d not found",hospitalId));
+        }
+        Hospital hospital = hospitalRepository.getById(hospitalId);
+        department1.setName(department.getName());
+        department1.setHospital(hospital);
+        departmentRepository.save(department1);
     }
 
     @Override

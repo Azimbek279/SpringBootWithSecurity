@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import peaksoft.exception.BadRequestException;
+import peaksoft.exception.NotFoundException;
 import peaksoft.model.Appointment;
 import peaksoft.model.Doctor;
 import peaksoft.model.Hospital;
@@ -30,11 +31,18 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional
     @Override
     public void saveDoctor(Doctor doctor, Long hospitalId) {
+        Doctor doctor1 = new Doctor();
+        if (hospitalRepository.getById(hospitalId) == null){
+            throw new NotFoundException(String.format("Hospital with id %d not found",hospitalId));
+        }
         Hospital hospital = hospitalRepository.getById(hospitalId);
-        hospital.addDoctor(doctor);
-        doctor.setHospital(hospital);
-        doctorRepository.save(doctor);
-        doctor.getHospital().plusDoctor();
+        doctor1.setFirstName(doctor.getFirstName());
+        doctor1.setLastName(doctor.getLastName());
+        doctor1.setEmail(doctor.getEmail());
+        doctor1.setPosition(doctor.getPosition());
+        doctor1.setHospital(hospital);
+        hospital.plusDoctor();
+        doctorRepository.save(doctor1);
     }
 
     @Override

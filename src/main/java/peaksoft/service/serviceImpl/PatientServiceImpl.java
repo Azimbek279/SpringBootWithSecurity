@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import peaksoft.exception.BadRequestException;
+import peaksoft.exception.NotFoundException;
 import peaksoft.model.Appointment;
 import peaksoft.model.Hospital;
 import peaksoft.model.Patient;
@@ -35,12 +36,20 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public void savePatient(Patient patient, Long hospitalId) {
+        Patient patient1 = new Patient();
+        if (hospitalRepository.getById(hospitalId) == null){
+            throw new NotFoundException(String.format("Hospital with id %d not found",hospitalId));
+        }
         Hospital hospital = hospitalRepository.getById(hospitalId);
-        hospital.addPatient(patient);
+        patient1.setFirstName(patient.getFirstName());
+        patient1.setLastName(patient.getLastName());
+        patient1.setEmail(patient.getEmail());
         validation(patient.getPhoneNumber().replace(" ", ""));
-        patient.setHospital(hospital);
-        patientRepository.save(patient);
-        patient.getHospital().plusPatient();
+        patient1.setGender(patient.getGender());
+        patient1.setPhoneNumber(patient.getPhoneNumber());
+        patient1.setHospital(hospital);
+        hospital.plusPatient();
+        patientRepository.save(patient1);
     }
 
     @Override
